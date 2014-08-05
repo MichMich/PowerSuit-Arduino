@@ -9,10 +9,19 @@
 
 #include "Arduino.h"
 #include <Adafruit_NeoPixel.h>
+#include <elapsedMillis.h>
 
 enum EffectMode {
 	Loop,
 	Sparkle
+};
+
+enum LightIdentifier {
+  Heart,
+  LeftEye,
+  RightEye,
+  LeftArm,
+  RightArm
 };
 
 class LightManager
@@ -23,15 +32,24 @@ class LightManager
     void update();
     void setSpeed(int speed);
     void setEffectMode(EffectMode effectMode);
+    void setColorEffect(float red, float green, float blue);
 
   private:
-    int _pixel;
+    int _frame;
     int _speed;
     EffectMode _effectMode;
-    void nextPixel();
+    Adafruit_NeoPixel _neoPixels; 
+    elapsedMillis _timeElapsed;
+
+    float _colorEffectRed;
+    float _colorEffectGreen;
+    float _colorEffectBlue;
+
     
-    void effectLoop();
-    void effectSparkle();
+    void clearAll();
+    void nextPixel();
+    void effectLoop(const int pixelArray[], int size);
+    void effectSparkle(const int pixelArray[], int size);
 
 };
 

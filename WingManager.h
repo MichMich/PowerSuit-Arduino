@@ -23,10 +23,11 @@ class WingManager
     WingManager();
     void init();
     void update();
-    void setWing(WingIdentifier wing, int angle);
+    void setWing(WingIdentifier wing, float angle);
+    void disable();
 
   //private:
-
+    void enable();
 
 
 };

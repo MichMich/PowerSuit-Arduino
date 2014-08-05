@@ -8,7 +8,10 @@
 #include "WingManager.h"
 #include <Servo.h>
 
-const int DOWNL = 155;
+const int PIN_LEFT = 5;
+const int PIN_RIGHT = 4;
+
+const int DOWNL = 140;
 const int UPL = 50;
 
 const int DOWNR = 40;
@@ -24,11 +27,11 @@ WingManager::WingManager()
 
 void WingManager::init()
 {
-	servoL.attach(5);  
-	servoR.attach(4);  
+	// servoL.attach(5);  
+	// servoR.attach(4);  
 
-	servoL.write(DOWNL);
-	servoR.write(DOWNR);
+	// servoL.write(DOWNL);
+	// servoR.write(DOWNR);
 }
 
 void WingManager::update()
@@ -37,21 +40,36 @@ void WingManager::update()
 
 }
 
-void WingManager::setWing(WingIdentifier wing, int angle)
+void WingManager::setWing(WingIdentifier wing, float angle)
 {
+	WingManager::enable();
+
 	switch (wing) {
 		case LeftWing:
-			servoL.write(angle);
+			servoL.write(map(angle,0,1,DOWNL, UPL));
 		break;
 		case RightWing:
-			servoR.write(angle);
+			servoR.write(map(angle,0,1,DOWNR, UPR));
 		break;
 		default:
-			servoL.write(angle);
-			servoR.write(angle);
+			servoL.write(map(angle,0,1,DOWNL, UPL));
+			servoR.write(map(angle,0,1,DOWNR, UPR));
 		break;
 	}	
 }
 
+
+void WingManager::disable()
+{
+	if (servoL.attached()) servoL.detach();
+	if (servoR.attached()) servoR.detach();
+}
+
+
 // Private functions
+void WingManager::enable()
+{
+	if (!servoL.attached()) servoL.attach(PIN_LEFT);
+	if (!servoR.attached()) servoR.attach(PIN_RIGHT);
+}
 

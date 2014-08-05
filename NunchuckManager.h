@@ -21,7 +21,7 @@ class NunchuckManager
     void update();
 
     int north;
-    int nothEast;
+    int northEast;
     int east;
     int southEast;
     int south;
@@ -29,7 +29,11 @@ class NunchuckManager
     int west;
     int northWest;
 
-  //private:
+    bool zButton;
+    bool cButton;
+
+  private:
+    int cleanValue(int value);
 
 
 

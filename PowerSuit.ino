@@ -20,74 +20,73 @@
 
 LightManager lightManager = LightManager();
 WingManager wingManager = WingManager();
-NunchuckManager nunchukManager = NunchuckManager();
+NunchuckManager nunchuckManager = NunchuckManager();
 
 void setup() {
 	Serial.begin(9600);
+        while(!Serial);
 
 	// Setup peripherals
 	lightManager.init();
-	// wingManager.init();
-	nunchukManager.init();
+	wingManager.init();
+	nunchuckManager.init();
 	
 
 	//lightManager.setSpeed(10);
 	//lightManager.setEffectMode(Sparkle);
 
+
+
 }
 
 void loop() {
 	// Update peripherals
-
 	lightManager.update();
 	wingManager.update();
-	nunchukManager.update();
-
-	//lightManager.setSpeed(nunchuk.analogX);
-	//lightManager.setEffectMode((nunchuk.zButton) ? Sparkle : Loop);
+	nunchuckManager.update();
 
 
+
+	// color control
+	if (!nunchuckManager.zButton && !nunchuckManager.cButton) {
+		colorControl();
+	}
+
+	// effect control
+	if (nunchuckManager.zButton && !nunchuckManager.cButton) {
+		effectControl();
+	}
+
+	// wing control
+	if (!nunchuckManager.zButton && nunchuckManager.cButton) {
+		wingControl();
+	}
 }
 
-
-#define TRIMX 3
-#define TRIMY 0
-
-#define DOWNL 155
-#define UPL 50
-
-#define DOWNR 40
-#define UPR 150
-
-/*
-void controlWings()
+void colorControl()
 {
-	int inputLeft = (nunchuk.analogX + TRIMX - 128) * -1;
-	int inputRight = (nunchuk.analogX + TRIMX - 128);
-
-	int inputUp = (nunchuk.analogY + TRIMY - 128);
-	int inputDown = (nunchuk.analogY + TRIMY - 128) * -1;
-
-	inputLeft = trimInt(inputLeft, 0, 125);
-	inputRight = trimInt(inputRight, 0, 125);
-
-	inputUp = trimInt(inputUp, 0, 125);
-	inputDown = trimInt(inputDown, 0, 125);
-
-
-	int angleLeft =  map((inputUp > inputLeft)  ? inputUp : inputLeft,  0, 125, DOWNL, UPL);
-	int angleRight = map((inputUp > inputRight) ? inputUp : inputRight, 0, 125, DOWNR, UPR);
-
-
-	wingManager.setWing(LeftWing, angleLeft);
-	wingManager.setWing(RightWing, angleRight);
+	lightManager.setColorEffect(nunchuckManager.north / 127.0, nunchuckManager.southEast / 127.0, nunchuckManager.southWest / 127.0);
 }
 
-int trimInt(int value, int min, int max)
+void effectControl()
 {
-	if (value < min) value = min;
-	if (value > max) value = max;
-	return value;
+
 }
-*/
+
+void wingControl()
+{
+	if (nunchuckManager.south < 64) {
+		float left = max(nunchuckManager.northWest / 127.0,nunchuckManager.west / 127.0);
+		float right = max(nunchuckManager.northEast / 127.0,nunchuckManager.east / 127.0);
+
+		left = max(nunchuckManager.north / 127.0, left);
+		right = max(nunchuckManager.north / 127.0, right);
+
+		wingManager.setWing(LeftWing, left);
+		wingManager.setWing(RightWing, right);
+
+	} else {
+		wingManager.disable();
+	}
+}
 
