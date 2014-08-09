@@ -20,15 +20,18 @@ class NunchuckManager
     void init();
     void update();
 
-    int north;
-    int northEast;
-    int east;
-    int southEast;
-    int south;
-    int southWest;
-    int west;
-    int northWest;
+    float north;
+    float northEast;
+    float east;
+    float southEast;
+    float south;
+    float southWest;
+    float west;
+    float northWest;
 
+    float max;
+    float center;
+    
     bool zButton;
     bool cButton;
 

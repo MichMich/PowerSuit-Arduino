@@ -51,6 +51,9 @@ class LightManager
     void effectLoop(const int pixelArray[], int size);
     void effectSparkle(const int pixelArray[], int size);
 
+    uint32_t getColorWithBrightness(int brightness);
+    uint32_t getColorWithRGB(int r, int g, int b);
+
 };
 
 #endif

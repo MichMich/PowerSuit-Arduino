@@ -32,18 +32,33 @@ void NunchuckManager::update()
 {
 	nunchuk.update();
 
-	NunchuckManager::west = NunchuckManager::cleanValue((nunchuk.analogX + TRIMX - 128) * -1);
-	NunchuckManager::east = NunchuckManager::cleanValue((nunchuk.analogX + TRIMX - 128));
-	NunchuckManager::north = NunchuckManager::cleanValue((nunchuk.analogY + TRIMY - 128));
-	NunchuckManager::south = NunchuckManager::cleanValue((nunchuk.analogY + TRIMY - 128) * -1);
+	int west = NunchuckManager::cleanValue((nunchuk.analogX + TRIMX - 128) * -1);
+	int east = NunchuckManager::cleanValue((nunchuk.analogX + TRIMX - 128));
+	int north = NunchuckManager::cleanValue((nunchuk.analogY + TRIMY - 128));
+	int south = NunchuckManager::cleanValue((nunchuk.analogY + TRIMY - 128) * -1);
 
-	NunchuckManager::northEast = (NunchuckManager::north * NunchuckManager::east) / 127;
-	NunchuckManager::southEast = (NunchuckManager::south * NunchuckManager::east) / 127;
-	NunchuckManager::southWest = (NunchuckManager::south * NunchuckManager::west) / 127;
-	NunchuckManager::northWest = (NunchuckManager::north * NunchuckManager::west) / 127;
+	int northEast = (north * east) / 127;
+	int southEast = (south * east) / 127;
+	int southWest = (south * west) / 127;
+	int northWest = (north * west) / 127;
+
+	NunchuckManager::west = west / 127.0;
+	NunchuckManager::west = east / 127.0;
+	NunchuckManager::north = north / 127.0;
+	NunchuckManager::south = south / 127.0;
+
+	NunchuckManager::northEast = northEast / 127.0;
+	NunchuckManager::southEast = southEast / 127.0;
+	NunchuckManager::southWest = southWest / 127.0;
+	NunchuckManager::northWest = northWest / 127.0;
 
 	NunchuckManager::zButton = nunchuk.zButton;
 	NunchuckManager::cButton = nunchuk.cButton;
+
+
+	NunchuckManager::max = max(NunchuckManager::west, max(NunchuckManager::east, max(NunchuckManager::north, max(NunchuckManager::south, max(NunchuckManager::northEast, max(NunchuckManager::southEast, max(NunchuckManager::southWest, NunchuckManager::northWest)))))));
+	NunchuckManager::center = 1.0 - NunchuckManager::max;
+
 
 /*
 	if (timeElapsed2 > 1000) {	
@@ -88,8 +103,8 @@ int NunchuckManager::cleanValue(int value)
 {
   value = max(0,value);
   value = min(127,value);
-  if (value < 14) value = 0;
-  if (value > 114) value = 127;
+  if (value < 8) value = 0;
+  if (value > 119) value = 127;
   
   return value;
 }
