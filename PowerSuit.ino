@@ -17,8 +17,8 @@
 
 
 //communication string
-#define CS_WING_ENABLE "CS_WING_ENABLE"
-#define CS_WING_DISABLE "CS_WING_DISABLE"
+#define CS_WING_ENABLE "WING_ENABLE"
+#define CS_WING_DISABLE "WING_DISABLE"
 
 #define LED 13
 
@@ -85,6 +85,10 @@ void colorControl()
 	float r = nunchuckManager.center;
 	float g = max(nunchuckManager.northEast, nunchuckManager.southWest);
 	float b = max(nunchuckManager.northWest, nunchuckManager.southEast);
+
+	r = max(r, nunchuckManager.south);
+	g = max(g, nunchuckManager.south);
+	b = max(b, nunchuckManager.south);
 
 	lightManager.setColorEffect(r,g,b);
 }
