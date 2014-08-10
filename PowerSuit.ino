@@ -8,22 +8,24 @@
 #include <SPI.h>
 #include "Adafruit_BLE_UART.h"
 
-
 #include "LightManager.h"
 #include "WingManager.h"
 #include "NunchuckManager.h"
 #include "EqualizerManager.h"
 #include "BluetoothManager.h"
 
-
 //communication string
-#define CS_WING_ENABLE "WING_ENABLE"
-#define CS_WING_DISABLE "WING_DISABLE"
+//#define CS_WINGS_ENABLED "WINGS_ENABLED"
+#define CS_WINGS_DISABLED "WINGS_DISABLED"
+#define CS_WINGS_BOTH_UP "WINGS_BOTH_UP"
+//#define CS_WINGS_BOTH_DOWN "WINGS_BOTH_DOWN"
 
-#define LED 13
 
-//Logger logger = Logger();
-
+#define CS_EFFECT_MODE_NONE "EFFECT_MODE_NONE"
+#define CS_EFFECT_MODE_LOOP "EFFECT_MODE_LOOP"
+#define CS_EFFECT_MODE_SPARKLE "EFFECT_MODE_SPARKLE"
+#define CS_EFFECT_MODE_PLASMA "EFFECT_MODE_PLASMA"
+#define CS_EFFECT_MODE_VU "EFFECT_MODE_VU"
 
 LightManager lightManager = LightManager();
 WingManager wingManager = WingManager();
@@ -31,60 +33,25 @@ NunchuckManager nunchuckManager = NunchuckManager();
 EqualizerManager equalizerManager = EqualizerManager();
 BluetoothManager bluetoothManager = BluetoothManager();
 
+Direction lastDirection = Center;
+bool wingsEnabled = false;
+
 void setup() {
-	Serial.begin(9600);
-        while(!Serial);
-
-	// Setup peripherals
-	lightManager.init();
-	wingManager.init();
+	// Initialize peripherals
 	nunchuckManager.init();
-	equalizerManager.init();
 	bluetoothManager.init();
-	
 
-	//lightManager.setSpeed(10);
-
-	bluetoothManager.setRXCallback(rxCallback);
-
-
-}
-
-void loop() {
-	// Update peripherals
-	lightManager.update();
-	wingManager.update();
-	nunchuckManager.update();
-	equalizerManager.update();
-	bluetoothManager.update();
-
-
-	//control lightspeed
-	lightManager.setSpeed(20 - (19 * max(equalizerManager.bandLow,max(equalizerManager.bandMid, equalizerManager.bandHigh))));
-
-	// color control
-	if (nunchuckManager.zButton && !nunchuckManager.cButton) {
-		colorControl();
-	} else {
-		lightManager.setColorEffect(equalizerManager.bandLow, equalizerManager.bandMid, equalizerManager.bandHigh);
-	}
-
-	// effect control
-	if (!nunchuckManager.zButton && !nunchuckManager.cButton) {
-		effectControl();
-	}
-
-	// wing control
-	if (!nunchuckManager.zButton && nunchuckManager.cButton) {
-		wingControl();
-	}
+	lightManager.setEffectMode(Loop);
 }
 
 void colorControl()
 {
 	float r = nunchuckManager.center;
-	float g = max(nunchuckManager.northEast, nunchuckManager.southWest);
-	float b = max(nunchuckManager.northWest, nunchuckManager.southEast);
+	float g = max(nunchuckManager.west, nunchuckManager.northWest);
+	float b = max(nunchuckManager.east, nunchuckManager.northEast);
+
+	g = max(nunchuckManager.north, g);
+	b = max(nunchuckManager.north, b);
 
 	r = max(r, nunchuckManager.south);
 	g = max(g, nunchuckManager.south);
@@ -93,32 +60,26 @@ void colorControl()
 	lightManager.setColorEffect(r,g,b);
 }
 
-
-bool isLoop = true;
-
 void effectControl()
 {
-	bool newIsLoop;
-	if (nunchuckManager.west > 0.5) {
-		lightManager.setEffectMode(Sparkle);
-		newIsLoop = false;
-	} else {
+	if (nunchuckManager.direction == North) {
 		lightManager.setEffectMode(Loop);
-		newIsLoop = true;
-	}
+		bluetoothManager.sendString(CS_EFFECT_MODE_LOOP);
+	} else if (nunchuckManager.direction == South) {
+		lightManager.setEffectMode(Plasma);
+		bluetoothManager.sendString(CS_EFFECT_MODE_PLASMA);
+	} else if (nunchuckManager.direction == West) {
+		lightManager.setEffectMode(Sparkle);
+		bluetoothManager.sendString(CS_EFFECT_MODE_SPARKLE);
+	} else if (nunchuckManager.direction == East) {
+		lightManager.setEffectMode(VU);
+		bluetoothManager.sendString(CS_EFFECT_MODE_VU);
+	} 
 
-	if (isLoop != newIsLoop) {
-		isLoop = newIsLoop;
-		if (isLoop) {
-			bluetoothManager.sendString("Loop Mode");
-		} else {
-			bluetoothManager.sendString("Sparkle Mode");		
-		}
-	}
+
 }
 
-
-bool wingsEnabled = false;
+bool wingsUp = false;
 void wingControl()
 {
 	if (nunchuckManager.south < 0.5) {
@@ -133,24 +94,64 @@ void wingControl()
 
 		if (!wingsEnabled) {
 			wingsEnabled = true;
-			bluetoothManager.sendString(CS_WING_ENABLE);
+			//bluetoothManager.sendString(CS_WINGS_ENABLED);
+		} else {
+			if (left == 1 && right == 1 && !wingsUp) {
+				bluetoothManager.sendString(CS_WINGS_BOTH_UP);
+				wingsUp = true;
+			} else if (left < 1 || right < 0) {
+				wingsUp = false;
+			}
 		}
 
 	} else {
 		wingManager.disable();
 		if (wingsEnabled) {
 			wingsEnabled = false;
-			bluetoothManager.sendString(CS_WING_DISABLE);
+			bluetoothManager.sendString(CS_WINGS_DISABLED);
 		}
 	}
 }
 
-void rxCallback(uint8_t *buffer, uint8_t len)
-{
-  	Serial.print(F("Received: "));
-  	for(int i=0; i<len; i++) {
-   		Serial.print((char)buffer[i]); 
+void loop() {
+	// Update peripherals
+	lightManager.update();
+	nunchuckManager.update();
+	equalizerManager.update();
+	bluetoothManager.update();
+
+	if (lastDirection != nunchuckManager.direction) {
+		lastDirection = nunchuckManager.direction;
+
+		// effect control
+		if (!nunchuckManager.zButton && !nunchuckManager.cButton) {
+			effectControl();
+		}
 	}
-	Serial.println("");
+
+	//turn of lights 
+	if (nunchuckManager.zButton && nunchuckManager.cButton && nunchuckManager.direction == South) {
+		lightManager.setEffectMode(None);
+		bluetoothManager.sendString(CS_EFFECT_MODE_NONE);
+	}
+
+	// control Lightspeed via Equalizer
+	lightManager.setSpeed(20 - (19 * max(equalizerManager.bandLow,max(equalizerManager.bandMid, equalizerManager.bandHigh))));
+
+	// color control
+	if (nunchuckManager.zButton && !nunchuckManager.cButton) {
+		// Manual Control
+		colorControl();
+	} else {
+		// Control via Equalizer
+		lightManager.setColorEffect(equalizerManager.bandLow, equalizerManager.bandMid, equalizerManager.bandHigh);
+	}
+
+	// wing control
+	if (!nunchuckManager.zButton && nunchuckManager.cButton) {
+		wingControl();
+	}
 }
+
+
 

@@ -17,12 +17,12 @@ const int ADAFRUITBLE_RST = 8;
 // Public functions
 BluetoothManager::BluetoothManager() : _uart(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST)
 {
-
+  
 }
 
 void BluetoothManager::init()
 {
-	_uart.begin();
+  _uart.begin();	
 }
 
 void BluetoothManager::update()

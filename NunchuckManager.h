@@ -11,6 +11,18 @@
 
 
 
+enum Direction {
+  Nort,
+  North,
+  NorthEast,
+  East,
+  SouthEast,
+  South,
+  SouthWest,
+  West,
+  NorthWest,
+  Center
+};
 
 
 class NunchuckManager
@@ -35,10 +47,10 @@ class NunchuckManager
     bool zButton;
     bool cButton;
 
+    Direction direction;
+
   private:
     int cleanValue(int value);
-
-
 
 };
 

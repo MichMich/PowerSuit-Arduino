@@ -25,39 +25,23 @@ WingManager::WingManager()
 
 }
 
-void WingManager::init()
-{
-	// servoL.attach(5);  
-	// servoR.attach(4);  
-
-	// servoL.write(DOWNL);
-	// servoR.write(DOWNR);
-}
-
-void WingManager::update()
-{
-
-
-}
-
 void WingManager::setWing(WingIdentifier wing, float angle)
 {
 	WingManager::enable();
 
 	switch (wing) {
 		case LeftWing:
-			servoL.write(map(angle,0,1,DOWNL, UPL));
+			servoL.write(map(angle*255,0,255,DOWNL, UPL));
 		break;
 		case RightWing:
-			servoR.write(map(angle,0,1,DOWNR, UPR));
+			servoR.write(map(angle*255,0,255,DOWNR, UPR));
 		break;
 		default:
-			servoL.write(map(angle,0,1,DOWNL, UPL));
-			servoR.write(map(angle,0,1,DOWNR, UPR));
+			servoL.write(map(angle*255,0,255,DOWNL, UPL));
+			servoR.write(map(angle*255,0,255,DOWNR, UPR));
 		break;
 	}	
 }
-
 
 void WingManager::disable()
 {
@@ -65,8 +49,6 @@ void WingManager::disable()
 	if (servoR.attached()) servoR.detach();
 }
 
-
-// Private functions
 void WingManager::enable()
 {
 	if (!servoL.attached()) servoL.attach(PIN_LEFT);

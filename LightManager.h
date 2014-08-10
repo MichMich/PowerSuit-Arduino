@@ -12,8 +12,11 @@
 #include <elapsedMillis.h>
 
 enum EffectMode {
+  None,
 	Loop,
-	Sparkle
+	Sparkle,
+  Plasma,
+  VU
 };
 
 enum LightIdentifier {
@@ -24,19 +27,23 @@ enum LightIdentifier {
   RightArm
 };
 
+struct Point {
+  float x;
+  float y;
+};
+
 class LightManager
 {
   public:
     LightManager();
-    void init();
     void update();
-    void setSpeed(int speed);
+    void setSpeed(byte speed);
     void setEffectMode(EffectMode effectMode);
     void setColorEffect(float red, float green, float blue);
 
   private:
-    int _frame;
-    int _speed;
+    byte _frame;
+    byte _speed;
     EffectMode _effectMode;
     Adafruit_NeoPixel _neoPixels; 
     elapsedMillis _timeElapsed;
@@ -45,14 +52,17 @@ class LightManager
     float _colorEffectGreen;
     float _colorEffectBlue;
 
+    float _phase;
     
     void clearAll();
     void nextPixel();
-    void effectLoop(const int pixelArray[], int size);
-    void effectSparkle(const int pixelArray[], int size);
+    void effectLoop(const byte pixelArray[], byte size);
+    void effectSparkle();
+    void effectPlasma();
+    void effectVU(const byte pixelArray[], byte size);
 
-    uint32_t getColorWithBrightness(int brightness);
-    uint32_t getColorWithRGB(int r, int g, int b);
+    uint32_t getColorWithBrightness(byte brightness);
+    uint32_t getColorWithRGB(byte r, byte g, byte b);
 
 };
 

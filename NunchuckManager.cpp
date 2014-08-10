@@ -11,7 +11,7 @@
 #include <elapsedMillis.h>
 
 
-elapsedMillis timeElapsed2;
+
 
 ArduinoNunchuk nunchuk = ArduinoNunchuk();
 
@@ -20,7 +20,7 @@ const int TRIMY = 0;
 
 NunchuckManager::NunchuckManager()
 {
-
+	direction = Center;
 }
 
 void NunchuckManager::init()
@@ -32,71 +32,78 @@ void NunchuckManager::update()
 {
 	nunchuk.update();
 
-	int west = NunchuckManager::cleanValue((nunchuk.analogX + TRIMX - 128) * -1);
-	int east = NunchuckManager::cleanValue((nunchuk.analogX + TRIMX - 128));
-	int north = NunchuckManager::cleanValue((nunchuk.analogY + TRIMY - 128));
-	int south = NunchuckManager::cleanValue((nunchuk.analogY + TRIMY - 128) * -1);
+	west = cleanValue((nunchuk.analogX + TRIMX - 128) * -1) / 127.0;
+	east = cleanValue((nunchuk.analogX + TRIMX - 128)) / 127.0;
+	north = cleanValue((nunchuk.analogY + TRIMY - 128)) / 127.0;
+	south = cleanValue((nunchuk.analogY + TRIMY - 128) * -1) / 127.0;
 
-	int northEast = (north * east) / 127;
-	int southEast = (south * east) / 127;
-	int southWest = (south * west) / 127;
-	int northWest = (north * west) / 127;
+	northEast = (north * east);
+	southEast = (south * east);
+	southWest = (south * west);
+	northWest = (north * west);
 
-	NunchuckManager::west = west / 127.0;
-	NunchuckManager::west = east / 127.0;
-	NunchuckManager::north = north / 127.0;
-	NunchuckManager::south = south / 127.0;
+	zButton = nunchuk.zButton;
+	cButton = nunchuk.cButton;
 
-	NunchuckManager::northEast = northEast / 127.0;
-	NunchuckManager::southEast = southEast / 127.0;
-	NunchuckManager::southWest = southWest / 127.0;
-	NunchuckManager::northWest = northWest / 127.0;
+	max = max(west, max(east, max(north, max(south, max(northEast, max(southEast, max(southWest, northWest)))))));
+	center = 1.0 - max;
 
-	NunchuckManager::zButton = nunchuk.zButton;
-	NunchuckManager::cButton = nunchuk.cButton;
+	if (northEast == 1) {
+		direction = NorthEast;
+	} else if(southEast == 1) {
+		direction = SouthEast;
+	} else if(southWest == 1) {
+		direction = SouthWest;
+	} else if(northWest == 1) {
+		direction = NorthWest;
+	} else if(north == 1) {
+		direction = North;
+	} else if(east == 1) {
+		direction = East;
+	} else if(south == 1) {
+		direction = South;
+	} else if(west == 1) {
+		direction = West;
+	} else if (center == 1) {
+		direction = Center;
+	}
 
-
-	NunchuckManager::max = max(NunchuckManager::west, max(NunchuckManager::east, max(NunchuckManager::north, max(NunchuckManager::south, max(NunchuckManager::northEast, max(NunchuckManager::southEast, max(NunchuckManager::southWest, NunchuckManager::northWest)))))));
-	NunchuckManager::center = 1.0 - NunchuckManager::max;
-
-
-/*
-	if (timeElapsed2 > 1000) {	
+	/*
 		Serial.print("N: ");
-		Serial.print(NunchuckManager::north, DEC);
+		Serial.print(north, DEC);
 
 		Serial.print("  NE: ");			
-		Serial.print(NunchuckManager::northEast, DEC);
+		Serial.print(northEast, DEC);
 
 		Serial.print("  E: ");			
-		Serial.print(NunchuckManager::east, DEC);
+		Serial.print(east, DEC);
 
 		Serial.print("  SE: ");			
-		Serial.print(NunchuckManager::southEast, DEC);
+		Serial.print(southEast, DEC);
 
 		Serial.print("  S: ");			
-		Serial.print(NunchuckManager::south, DEC);
+		Serial.print(south, DEC);
 
 		Serial.print("  SW: ");			
-		Serial.print(NunchuckManager::southWest, DEC);
+		Serial.print(southWest, DEC);
 
 		Serial.print("  W: ");			
-		Serial.print(NunchuckManager::west, DEC);
+		Serial.print(west, DEC);
 
 		Serial.print("  NW: ");			
-		Serial.print(NunchuckManager::northWest, DEC);
+		Serial.print(northWest, DEC);
 
 		Serial.print("  zB: ");			
-		Serial.print(NunchuckManager::zButton, DEC);
+		Serial.print(zButton, DEC);
 
 		Serial.print("  cB: ");			
-		Serial.print(NunchuckManager::cButton, DEC);
+		Serial.print(cButton, DEC);
 
 		Serial.println(" ");
+	*/
 
-		timeElapsed2 = 0; 
-	}
-*/
+
+
 }
 
 int NunchuckManager::cleanValue(int value)

@@ -14,7 +14,6 @@
 extern "C" 
 {
   /* Callback prototypes */
-  typedef void (*aci_callback)(aci_evt_opcode_t event);
   typedef void (*rx_callback) (uint8_t *buffer, uint8_t len);
 }
 

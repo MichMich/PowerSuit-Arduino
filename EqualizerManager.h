@@ -16,7 +16,6 @@ class EqualizerManager
 {
   public:
     EqualizerManager();
-    void init();
     void update();
 
     float bandLow;
