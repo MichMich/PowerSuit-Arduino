@@ -35,13 +35,14 @@ BluetoothManager bluetoothManager = BluetoothManager();
 
 Direction lastDirection = Center;
 bool wingsEnabled = false;
+bool lasersEnabled = true;
 
 void setup() {
 	// Initialize peripherals
 	nunchuckManager.init();
 	bluetoothManager.init();
 
-	lightManager.setEffectMode(Loop);
+	lightManager.setEffectMode(None);
 }
 
 void colorControl()
@@ -65,15 +66,19 @@ void effectControl()
 	if (nunchuckManager.direction == North) {
 		lightManager.setEffectMode(Loop);
 		bluetoothManager.sendString(CS_EFFECT_MODE_LOOP);
+		lasersEnabled = true;
 	} else if (nunchuckManager.direction == South) {
 		lightManager.setEffectMode(Plasma);
 		bluetoothManager.sendString(CS_EFFECT_MODE_PLASMA);
+		lasersEnabled = true;
 	} else if (nunchuckManager.direction == West) {
 		lightManager.setEffectMode(Sparkle);
 		bluetoothManager.sendString(CS_EFFECT_MODE_SPARKLE);
+		lasersEnabled = true;
 	} else if (nunchuckManager.direction == East) {
 		lightManager.setEffectMode(VU);
 		bluetoothManager.sendString(CS_EFFECT_MODE_VU);
+		lasersEnabled = true;
 	} 
 
 
@@ -113,6 +118,7 @@ void wingControl()
 	}
 }
 
+
 void loop() {
 	// Update peripherals
 	lightManager.update();
@@ -129,10 +135,11 @@ void loop() {
 		}
 	}
 
-	//turn of lights 
-	if (nunchuckManager.zButton && nunchuckManager.cButton && nunchuckManager.direction == South) {
+	//turn off lights 
+	if (nunchuckManager.zButton && nunchuckManager.cButton && nunchuckManager.direction == South && lasersEnabled) {
 		lightManager.setEffectMode(None);
 		bluetoothManager.sendString(CS_EFFECT_MODE_NONE);
+		lasersEnabled = false;
 	}
 
 	// control Lightspeed via Equalizer

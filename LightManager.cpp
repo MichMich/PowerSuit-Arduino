@@ -36,6 +36,8 @@ LightManager::LightManager(): _neoPixels(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO
 
 	_phase = 0.0;
 
+	_effectMode = None;
+
 }
 
 

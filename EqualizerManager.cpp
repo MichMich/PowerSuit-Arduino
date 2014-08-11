@@ -20,7 +20,7 @@ const int PIN_RESET = 9;
 const int PIN_DATA = 0; //analog
 
 const int LEVEL_MIN = 64;
-const int LEVEL_MAX = 600;
+const int LEVEL_MAX = 450;
 
 // Public functions
 EqualizerManager::EqualizerManager()
@@ -46,7 +46,7 @@ void EqualizerManager::update()
 // Private functions
 void EqualizerManager::readMSGEQ7()
 {
-	byte data[7];
+	int data[7];
 
 	//reset the data
 	digitalWrite(PIN_RESET, HIGH);
@@ -55,18 +55,18 @@ void EqualizerManager::readMSGEQ7()
 	//loop thru all 7 bands
 	for(int band=0; band <7; band++) {
 		digitalWrite(PIN_STROBE,LOW); // go to the next band 
-		delayMicroseconds(50); //gather some data
-		data[band] = constrain(map(analogRead(PIN_DATA),LEVEL_MIN,LEVEL_MAX,0,255),0,255);
+		delayMicroseconds(100); //gather some data
+		data[band] = constrain(map(analogRead(PIN_DATA),LEVEL_MIN,LEVEL_MAX,0,1024),0,1024);
 
 		digitalWrite(PIN_STROBE,HIGH); // reset the strobe pin
 	}
 
-	// bandLow = ((data[0] + data[1] + data[2]) / 3) / 255.0;
-	// bandMid = ((data[2] + data[3] + data[4]) / 3) / 255.0;
-	// bandHigh = ((data[4] + data[5] + data[6]) / 3) / 255.0;
+	// bandLow = ((data[0] + data[1] + data[2]) / 3) / 1024.0;
+	// bandMid = ((data[2] + data[3] + data[4]) / 3) / 1024.0;
+	// bandHigh = ((data[4] + data[5] + data[6]) / 3) / 1024.0;
 
-	bandLow = max(data[0], data[1]) / 255.0;
-	bandMid = data[3] / 255.0;
-	bandHigh = data[4] / 255.0;
+	bandLow = max(data[0], data[1]) / 1024.0;
+	bandMid = data[3] / 1024.0;
+	bandHigh = data[4] / 1024.0;
 }
 
