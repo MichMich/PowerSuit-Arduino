@@ -12,7 +12,7 @@ const int PIN_LEFT = 5;
 const int PIN_RIGHT = 4;
 
 const int DOWNL = 140;
-const int UPL = 50;
+const int UPL = 30;
 
 const int DOWNR = 40;
 const int UPR = 150;
